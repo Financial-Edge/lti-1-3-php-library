@@ -79,15 +79,12 @@ class LTI_Service_Connector {
         if (curl_errno($ch)){
             echo 'Request Error:' . curl_error($ch);
         }
-        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+
         curl_close ($ch);
 
-        $resp_headers = substr($response, 0, $header_size);
-        $resp_body = substr($response, $header_size);
         return [
-            'headers' => array_filter(explode("\r\n", $resp_headers)),
-            'body' => json_decode($resp_body, true),
+            'headers' => [],
+            'body' => json_decode($response, true),
         ];
     }
 }
-?>
