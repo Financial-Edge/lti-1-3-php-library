@@ -209,7 +209,22 @@ class LTI_Message_Launch {
         $key_set_url = $this->registration->get_key_set_url();
 
         // Download key set
-        $public_key_set = json_decode(file_get_contents($key_set_url), true);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $key_set_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'FE Learnosity LTI');
+        $key_set_response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new LTI_Exception("Failed to fetch public key: " . $error, 1);
+        }
+
+        curl_close($ch);
+        $public_key_set = json_decode($key_set_response, true);
 
         if (empty($public_key_set)) {
             // Failed to fetch public keyset from URL.
